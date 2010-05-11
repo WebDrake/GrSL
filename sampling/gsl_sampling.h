@@ -62,6 +62,7 @@ gsl_sampler_skip (const gsl_sampler * s, const gsl_rng * r,
                   size_t * const remaining_records,
                   size_t * const remaining_samples)
 {
+  size_t S;
   if (*remaining_records == 0)
     {
       GSL_ERROR_VAL ("number of remaining_records is 0.",
@@ -74,7 +75,13 @@ gsl_sampler_skip (const gsl_sampler * s, const gsl_rng * r,
                      GSL_EINVAL, 0) ;
       return 0;
     }
-  return (s->skip) (r, remaining_records, remaining_samples);
+
+  S = (s->skip) (r, remaining_records, remaining_samples);
+
+  --(*remaining_records);
+  --(*remaining_samples);
+
+  return S;
 }
 
 INLINE_FUN size_t

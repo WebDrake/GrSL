@@ -1,7 +1,8 @@
-/* sampling/vitter_a.c
+/* sampling/vitter.c
  *
  * ---------------------------------------------------------------------
- * Provides an implementation of 'Algorithm A' described in
+ * Provides an implementation of Algorithms A and D introduced by
+ * Jeffrey Scott Vitter in the following articles:
  *
  *   Vitter JS (1984) 'Faster methods for random sampling'.
  *     Commun. ACM 27(7): 703--718
@@ -27,6 +28,40 @@
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_sampling.h>
 
+/* Vitter (1984) introduces Algorithm A as a component part of the
+   still-more-efficient Algorithm D.
+
+   By itself it runs in O(N) time, where N is the total number of
+   records, but generates only n random variates, where n is the
+   number of records to be sampled.
+
+   Algorithm D uses this method when the number of remaining samples
+   to be taken is greater than a certain proportion (0.05--0.15) of
+   the total number of remaining records to be sampled from.
+
+   --NOTES--
+
+     * Use of gsl_rng_uniform_pos to set value of V.  Vitter
+       (1984, 1987) assumes random variates are in the open interval
+       (0,1).  It is not clear whether this is essential.  If it is
+       not required a (miniscule:-) performance improvement may be
+       possible here.
+
+     * Use of gsl_rng_uniform_int if the number of remaining samples
+       is only 1.  Vitter (1984) simply calls for the truncation
+       (floor?) of the product of a random variate in (0,1) and the
+       number N of remaining records.  Vitter (1987) gives a more
+       complicated expression,
+
+           S := TRUNC( ROUND(Nreal) * UNIFORMRV() )
+
+       (where Nreal is a real-valued variable equal to the integer N),
+       in order to avoid the out-of-range possibility of S being
+       exactly equal to N.  All these appear to merely be complicated
+       ways of describing generating a uniformly-distributed integer
+       in the range [0, N-1], which is what gsl_rng_uniform_int
+       provides.
+ */
 static size_t
 vitter_a_skip(const gsl_rng * r, size_t * const remaining_records,
               size_t * const remaining_samples)
@@ -54,12 +89,32 @@ vitter_a_skip(const gsl_rng * r, size_t * const remaining_records,
         }
     }
 
-  --(*remaining_records);
-  --(*remaining_samples);
-
   return S;
 }
 
 static const gsl_sampler vitter_a = {"vitter_a", &vitter_a_skip};
 
 const gsl_sampler *gsl_sampler_vitter_a = &vitter_a;
+
+/* Algorithm D, introduced in Vitter (1984), requires only ~n random
+   variates to be generated and runs in O(n) time.  This implementation
+   follows the more efficient version introduced in Vitter (1987).
+
+   The method calls Algorithm A to generate the skip size when the
+   number of remaining samples to be taken is greater than a certain
+   proportion alpha of the total number of remaining records.  This
+   implementation follows Vitter (1987) in taking alpha = 1/13.
+
+   A still more refined version is found in Algorithm E introduced by
+   Nair (1990).
+
+   --NOTES--
+
+     * An option to set alpha (or alpha_inverse) could be useful.
+       This could be a reason to resurrect the more complicated
+       gsl_sampler implementation modelled on the gsl_rng example,
+       with a sampler containing some void *state which can be set
+       with a config function.
+
+     * ... in any case, test with different values of alpha_inverse.
+ */
