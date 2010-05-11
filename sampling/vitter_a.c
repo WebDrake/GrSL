@@ -32,8 +32,8 @@
 
 static unsigned long int
 vitter_a_skip(const gsl_rng *r,
-              const unsigned long int *remaining_records,
-              const unsigned long int *remaining_samples)
+              unsigned long int *remaining_records,
+              unsigned long int *remaining_samples)
 {
   unsigned long int S;
   double top, V, quot;

@@ -17,7 +17,6 @@ AC_PROG_LN_S
 AC_PROG_LIBTOOL
 
 dnl Check for compiler features
-AC_C_SIZE_T
 AC_C_INLINE
 
 dnl Disable unnecessary libtool tests for FORTRAN and Java
@@ -35,12 +34,6 @@ GRSL_LIBS="-L$libdir -lgrsl $GRSL_LDFLAGS"
 AC_SUBST([GRSL_CFLAGS])
 AC_SUBST([GRSL_LDFLAGS])
 AC_SUBST([GRSL_LIBS])
-
-AM_CFLAGS = -I$(top_builddir)
-AM_LDFLAGS = $(GRSL_LDFLAGS)
-
-AC_SUBST([AM_CFLAGS])
-AC_SUBST([AM_LDFLAGS])
 
 CFLAGS="$CFLAGS -ansi -pedantic -Wall -Werror"
 
