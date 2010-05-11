@@ -142,7 +142,8 @@ int main(void)
   gsl_ran_choose(r, dest, 100000, src, 10000000, sizeof(double));
   end_time = clock();
 
-  printf("\t\tfinished in %lu clock ticks.\n",end_time-start_time);
+  printf("\t\tfinished in %g seconds.\n",
+         ((double) (end_time-start_time))/CLOCKS_PER_SEC);
 
   printf("\tgsl_sampler_choose:\n");
 
@@ -150,8 +151,8 @@ int main(void)
   gsl_sampler_choose(gsl_sampler_vitter_a, r, dest, 100000, src, 10000000, sizeof(double));
   end_time=clock();
 
-  printf("\t\tfinished in %lu clock ticks with gsl_sampler_vitter_a.\n",
-         end_time-start_time);
+  printf("\t\tfinished in %g seconds with gsl_sampler_vitter_a.\n",
+         ((double) (end_time-start_time))/CLOCKS_PER_SEC);
 
   free(dest);
   free(src);
