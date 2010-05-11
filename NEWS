@@ -1,2 +1,7 @@
-GrSL has just been starting, and is therefore so new that there is hardly any
-news about it. :-)
+** 2010/05/11 **
+
+  GrSL only started development today, and is therefore so new that there is
+  hardly any news about it. :-)
+
+  The current very limited functionality implements Algorithm A from Vitter
+  (1984, 1987) and has a couple of small demos of it at work.
