@@ -27,12 +27,11 @@
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_sampling.h>
 
-static unsigned long int
-vitter_a_skip(const gsl_rng *r,
-              unsigned long int * const remaining_records,
-              unsigned long int * const remaining_samples)
+static size_t
+vitter_a_skip(const gsl_rng * r, size_t * const remaining_records,
+              size_t * const remaining_samples)
 {
-  unsigned long int S;
+  size_t S;
   double top, V, quot;
 
   if (*remaining_samples == 1)

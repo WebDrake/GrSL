@@ -44,9 +44,8 @@ __BEGIN_DECLS
 typedef struct
   {
     const char *name;
-    unsigned long int (*skip) (const gsl_rng *r,
-                               unsigned long int * const remaining_records,
-                               unsigned long int * const remaining_samples);
+    size_t (*skip) (const gsl_rng *r, size_t * const remaining_records,
+                    size_t * const remaining_samples);
   }
 gsl_sampler;
 
@@ -58,11 +57,10 @@ GSL_VAR const gsl_sampler *gsl_sampler_nair_e;
 
 #ifdef HAVE_INLINE
 
-INLINE_FUN unsigned long int
-gsl_sampler_skip (const gsl_sampler *s,
-                  const gsl_rng *r,
-                  unsigned long int * const remaining_records,
-                  unsigned long int * const remaining_samples)
+INLINE_FUN size_t
+gsl_sampler_skip (const gsl_sampler * s, const gsl_rng * r,
+                  size_t * const remaining_records,
+                  size_t * const remaining_samples)
 {
   if (*remaining_records == 0)
     {
@@ -79,12 +77,11 @@ gsl_sampler_skip (const gsl_sampler *s,
   return (s->skip) (r, remaining_records, remaining_samples);
 }
 
-INLINE_FUN unsigned long int
-gsl_sampler_select(const gsl_sampler *s,
-                   const gsl_rng *r,
-                   unsigned long int * const current_record,
-                   unsigned long int * const remaining_records,
-                   unsigned long int * const remaining_samples)
+INLINE_FUN size_t
+gsl_sampler_select(const gsl_sampler * s, const gsl_rng * r,
+                   size_t * const current_record,
+                   size_t * const remaining_records,
+                   size_t * const remaining_samples)
 {
   *current_record += gsl_sampler_skip(s, r, remaining_records, remaining_samples);
   return (*current_record)++;
