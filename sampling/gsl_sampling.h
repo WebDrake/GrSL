@@ -34,6 +34,7 @@
 #define __GSL_SAMPLING_H__
 #include <gsl/gsl_types.h>
 #include <gsl/gsl_errno.h>
+#include <gsl/gsl_inline.h>
 #include <gsl/gsl_rng.h>
 
 #undef __BEGIN_DECLS
@@ -95,7 +96,7 @@ gsl_sampler_select(const gsl_sampler *s,
                    unsigned long int * const remaining_samples)
 {
   *current_record += gsl_sampler_skip(s, r, remaining_records, remaining_samples);
-  return *current_record++;
+  return (*current_record)++;
 }
 
 #endif /* HAVE_INLINE */
