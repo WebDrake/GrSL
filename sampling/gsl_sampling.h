@@ -53,8 +53,8 @@ typedef struct
   {
     const char *name;
     unsigned long int (*skip) (const gsl_rng *r,
-                               unsigned long int *remaining_records,
-                               unsigned long int *remaining_samples);
+                               unsigned long int * const remaining_records,
+                               unsigned long int * const remaining_samples);
   }
 gsl_sampler;
 
@@ -69,8 +69,8 @@ GSL_VAR const gsl_sampler *gsl_sampler_nair_e;
 INLINE_FUN unsigned long int
 gsl_sampler_skip (const gsl_sampler *s,
                   const gsl_rng *r,
-                  unsigned long int *remaining_records,
-                  unsigned long int *remaining_samples)
+                  unsigned long int * const remaining_records,
+                  unsigned long int * const remaining_samples)
 {
   if (*remaining_records == 0)
     {
@@ -90,9 +90,9 @@ gsl_sampler_skip (const gsl_sampler *s,
 INLINE_FUN unsigned long int
 gsl_sampler_select(const gsl_sampler *s,
                    const gsl_rng *r,
-                   unsigned long int *current_record,
-                   unsigned long int *remaining_records,
-                   unsigned long int *remaining_samples)
+                   unsigned long int * const current_record,
+                   unsigned long int * const remaining_records,
+                   unsigned long int * const remaining_samples)
 {
   *current_record += gsl_sampler_skip(s, r, remaining_records, remaining_samples);
   return *current_record++;
