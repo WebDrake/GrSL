@@ -1,0 +1,11 @@
+GrSL is currently in a very preliminary state.  Use at the risk of your own
+computer (and sanity:-)
+
+Dependencies: gsl-dev (libgsl0-dev).
+
+To build and install, use the GNU Autotools:
+	
+  autoreconf -ivf
+  ./configure
+  make
+  make install
