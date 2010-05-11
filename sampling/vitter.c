@@ -61,6 +61,10 @@
        ways of describing generating a uniformly-distributed integer
        in the range [0, N-1], which is what gsl_rng_uniform_int
        provides.
+
+     * Alteration of *remaining_records and *remaining_samples -- see
+       if this can be removed entirely outside these individual skip
+       functions and placed entirely in gsl_sampler_skip.
  */
 static size_t
 vitter_a_skip(const gsl_rng * r, size_t * const remaining_records,
@@ -72,6 +76,7 @@ vitter_a_skip(const gsl_rng * r, size_t * const remaining_records,
   if (*remaining_samples == 1)
     {
       S = gsl_rng_uniform_int(r, *remaining_records);
+      *remaining_records -= S;
     }
   else
     {
