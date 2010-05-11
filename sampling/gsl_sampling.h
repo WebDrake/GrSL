@@ -15,10 +15,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *
+ *
+ * --REFERENCES--
+ *
+ *   Nair KA (1990) 'An improved algorithm for ordered sequential
+ *     random sampling.'  ACM T. Math. Softw. 16(3): 269--274.
+ *
+ *   Vitter JS (1984) 'Faster methods for random sampling.'
+ *     Commun. ACM 27(7): 703--718
+ *
+ *   Vitter JS (1987) 'An efficient algorithm for sequential random
+ *     sampling.'  ACM T. Math. Softw. 13(1): 58--67.
+ *
  */
 
 #ifndef __GSL_SAMPLING_H__
 #define __GSL_SAMPLING_H__
+#include <gsl/gsl_types.h>
+#include <gsl/gsl_errno.h>
 #include <gsl/gsl_rng.h>
 
 #undef __BEGIN_DECLS
@@ -40,19 +55,13 @@ typedef struct
     unsigned long int (*skip) (const gsl_rng *r,
                                const unsigned long int *remaining_records,
                                const unsigned long int *remaining_samples);
-    unsigned long int (*select) (const gsl_rng *r,
-                                 const unsigned long int *current_record,
-                                 const unsigned long int *remaining_records,
-                                 const unsigned long int *remaining_samples);
-  }
-gsl_sampler_type;
-
-
-typedef struct
-  {
-    const gsl_sampling_type * type;
   }
 gsl_sampler;
+
+
+GSL_VAR const gsl_sampler *gsl_sampler_vitter_a;
+GSL_VAR const gsl_sampler *gsl_sampler_vitter_d;
+GSL_VAR const gsl_sampler *gsl_sampler_nair_e;
 
 
 #ifdef HAVE_INLINE
@@ -63,7 +72,19 @@ gsl_sampler_skip (const gsl_sampler *s,
                   const unsigned long int *remaining_records,
                   const unsigned long int *remaining_samples)
 {
-  return (s->type->skip) (r, remaining_records, remaining_samples);
+  if (*remaining_records == 0)
+    {
+      GSL_ERROR_VAL ("number of remaining_records is 0.",
+                     GSL_EINVAL, 0) ;
+      return 0;
+    }
+  else if (*remaining_samples == 0)
+    {
+      GSL_ERROR_VAL ("number of remaining_samples is 0.",
+                     GSL_EINVAL, 0) ;
+      return 0;
+    }
+  return (s->skip) (r, remaining_records, remaining_samples);
 }
 
 INLINE_FUN unsigned long int
