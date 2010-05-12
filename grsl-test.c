@@ -55,9 +55,9 @@ int main(void)
   while ( n > 0 )
     {
       selected_record = gsl_sampler_select(gsl_sampler_vitter_a,r,&current_record,&N,&n);
-      printf("\tselected record %lu.",selected_record);
-      printf("\trecords remaining: %lu.",N);
-      printf("\tremaining to select: %lu.\n",n);
+      printf("\tselected record %zu.",selected_record);
+      printf("\trecords remaining: %zu.",N);
+      printf("\tremaining to select: %zu.\n",n);
     }
 
   printf("\n");
@@ -84,7 +84,7 @@ int main(void)
     }
 
   for(i=0;i<10;++i)
-    printf("\trecord %lu was picked %lu times.\n",i+1,record_count[i]);
+    printf("\trecord %zu was picked %zu times.\n",i+1,record_count[i]);
 
   printf("\n");
   printf("Next up, we provide a comparison of the gsl_ran_choose function with\n");
