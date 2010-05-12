@@ -88,12 +88,6 @@ gsl_sampler_choose(const gsl_sampler * s, const gsl_rng * r, void * dest,
 
 #ifdef HAVE_INLINE
 
-INLINE_FUN const char *
-gsl_sampler_algorithm(const gsl_sampler * const s)
-{
-  return s->algorithm->name;
-}
-
 INLINE_FUN size_t
 gsl_sampler_skip (const gsl_sampler * s, const gsl_rng * r)
 {
