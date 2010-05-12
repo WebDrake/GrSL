@@ -69,5 +69,8 @@ AC_SUBST([GRSL_LIBS])
 
 CFLAGS="$CFLAGS -std=c99 -pedantic -Wall -Werror"
 
+AH_BOTTOM([#define RETURN_IF_NULL(x) if (!x) { return ; }
+])
+
 AC_CONFIG_FILES([grsl.pc gsl/Makefile sampling/Makefile Makefile])
 AC_OUTPUT

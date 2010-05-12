@@ -40,60 +40,88 @@
 
 __BEGIN_DECLS
 
+typedef struct GSL_SAMPLER gsl_sampler;
 
 typedef struct
   {
     const char *name;
-    size_t (*skip) (const gsl_rng *r, size_t * const remaining_records,
-                    size_t * const remaining_samples);
+    size_t size;
+    void (*init) (const gsl_sampler * s, const gsl_rng *r);
+    size_t (*skip) (const gsl_sampler * s, const gsl_rng *r);
   }
-gsl_sampler;
+gsl_sampling_algorithm;
+
+typedef struct
+  {
+    size_t total;
+    size_t remaining;
+  }
+gsl_sampling_records;
+
+struct GSL_SAMPLER
+  {
+    const gsl_sampling_algorithm *algorithm;
+    gsl_sampling_records *records;
+    gsl_sampling_records *sample;
+    void *state;
+  };
 
 
-GSL_VAR const gsl_sampler *gsl_sampler_vitter_a;
-GSL_VAR const gsl_sampler *gsl_sampler_vitter_d;
-GSL_VAR const gsl_sampler *gsl_sampler_nair_e;
+GSL_VAR const gsl_sampling_algorithm *gsl_sampler_vitter_a;
+GSL_VAR const gsl_sampling_algorithm *gsl_sampler_vitter_d;
+GSL_VAR const gsl_sampling_algorithm *gsl_sampler_nair_e;
+
+
+gsl_sampler *
+gsl_sampler_alloc(const gsl_sampling_algorithm *A);
+
+void
+gsl_sampler_free(gsl_sampler * s);
+
+int
+gsl_sampler_init(const gsl_sampler *s, const gsl_rng *r, size_t samples, size_t records);
 
 int
 gsl_sampler_choose(const gsl_sampler * s, const gsl_rng * r, void * dest,
                    size_t k, void * src, size_t n, size_t size);
 
+
 #ifdef HAVE_INLINE
 
+INLINE_FUN const char *
+gsl_sampler_algorithm(const gsl_sampler * const s)
+{
+  return s->algorithm->name;
+}
+
 INLINE_FUN size_t
-gsl_sampler_skip (const gsl_sampler * s, const gsl_rng * r,
-                  size_t * const remaining_records,
-                  size_t * const remaining_samples)
+gsl_sampler_skip (const gsl_sampler * s, const gsl_rng * r)
 {
   size_t S;
-  if (*remaining_records == 0)
+  if (s->records->remaining == 0)
     {
-      GSL_ERROR_VAL ("number of remaining_records is 0.",
+      GSL_ERROR_VAL ("No more records left to sample.",
                      GSL_EINVAL, 0) ;
-      return 0;
     }
-  else if (*remaining_samples == 0)
+  else if (s->sample->remaining == 0)
     {
-      GSL_ERROR_VAL ("number of remaining_samples is 0.",
+      GSL_ERROR_VAL ("Sample already contains the required number of records.",
                      GSL_EINVAL, 0) ;
-      return 0;
     }
 
-  S = (s->skip) (r, remaining_records, remaining_samples);
+  S = (s->algorithm->skip) (s, r);
 
-  --(*remaining_records);
-  --(*remaining_samples);
+  --(s->records->remaining);
+  --(s->sample->remaining);
 
   return S;
 }
 
 INLINE_FUN size_t
 gsl_sampler_select(const gsl_sampler * s, const gsl_rng * r,
-                   size_t * const current_record,
-                   size_t * const remaining_records,
-                   size_t * const remaining_samples)
+                   size_t * const current_record)
 {
-  *current_record += gsl_sampler_skip(s, r, remaining_records, remaining_samples);
+  *current_record += gsl_sampler_skip(s, r);
   return (*current_record)++;
 }
 

@@ -31,8 +31,9 @@
 
 int main(void)
 {
-  size_t i, N, n, current_record, selected_record;
+  size_t i, j, current_record, selected_record;
   size_t record_count[10];
+  gsl_sampler *s = gsl_sampler_alloc(gsl_sampler_vitter_a);
   gsl_rng *r = gsl_rng_alloc(gsl_rng_mt19937);
   double *dest, *src;
   clock_t start_time, end_time;
@@ -48,16 +49,15 @@ int main(void)
 
   printf("First, I'm going to make a sample of 5 records out of 10.\n\n");
 
-  N = 10;
-  n = 5;
+  gsl_sampler_init(s,r,5,10);
   current_record = 1;
 
-  while ( n > 0 )
+  for ( i = 0 ; i < s->sample->total ; ++i)
     {
-      selected_record = gsl_sampler_select(gsl_sampler_vitter_a,r,&current_record,&N,&n);
+      selected_record = gsl_sampler_select(s,r,&current_record);
       printf("\tselected record %zu.",selected_record);
-      printf("\trecords remaining: %zu.",N);
-      printf("\tremaining to select: %zu.\n",n);
+      printf("\trecords remaining: %zu.",s->records->remaining);
+      printf("\tremaining to select: %zu.\n",s->sample->remaining);
     }
 
   printf("\n");
@@ -70,15 +70,13 @@ int main(void)
 
   for(i=0;i<10000000;++i)
     {
-      N = 10;
-      n = 3;
+      gsl_sampler_init(s,r,3,10);
       current_record = 0;  /* note that we start with record 0 this time,
                               as we are going to be picking from an array ... */
 
-      while ( n > 0 )
+      for ( j = 0 ; j < s->sample->total ; ++j)
         {
-          selected_record =
-            gsl_sampler_select(gsl_sampler_vitter_a,r,&current_record,&N,&n);
+          selected_record = gsl_sampler_select(s,r,&current_record);
           record_count[selected_record]++;
         }
     }
@@ -111,15 +109,16 @@ int main(void)
   printf("\tgsl_sampler_choose:\n");
 
   start_time = clock();
-  gsl_sampler_choose(gsl_sampler_vitter_a, r, dest, 100000, src, 10000000, sizeof(double));
+  gsl_sampler_choose(s, r, dest, 100000, src, 10000000, sizeof(double));
   end_time=clock();
 
-  printf("\t\tfinished in %g seconds with gsl_sampler_vitter_a.\n",
-         ((double) (end_time-start_time))/CLOCKS_PER_SEC);
+  printf("\t\tfinished in %g seconds with %s.\n",
+         ((double) (end_time-start_time))/CLOCKS_PER_SEC, gsl_sampler_algorithm(s));
 
   free(dest);
   free(src);
 
+  gsl_sampler_free(s);
   gsl_rng_free(r);
 
   return EXIT_SUCCESS;

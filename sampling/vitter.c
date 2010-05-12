@@ -11,6 +11,8 @@
  *     sampling.'  ACM T. Math. Softw. 13(1): 58--67.
  * ---------------------------------------------------------------------
  *
+ * Copyright (C) 2010 Joseph Rushton Wakeling
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -25,6 +27,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <math.h>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_sampling.h>
 
@@ -66,40 +69,57 @@
        if this can be removed entirely outside these individual skip
        functions and placed entirely in gsl_sampler_skip.
  */
+typedef struct
+  {
+    double top;
+  }
+vitter_a_state_t;
+
+void
+vitter_a_init(const gsl_sampler * s, const gsl_rng * r)
+{
+  vitter_a_state_t *state = s->state;
+  state->top = s->records->remaining - s->sample->remaining;
+}
+
 static size_t
-vitter_a_skip(const gsl_rng * r, size_t * const remaining_records,
-              size_t * const remaining_samples)
+vitter_a_skip(const gsl_sampler * s, const gsl_rng * r)
 {
   size_t S;
-  double top, V, quot;
+  double V, quot;
+  vitter_a_state_t *state = s->state;
 
-  if (*remaining_samples == 1)
+  if (s->sample->remaining == 1)
     {
-      S = gsl_rng_uniform_int(r, *remaining_records);
-      *remaining_records -= S;
+      S = gsl_rng_uniform_int(r, s->records->remaining);
+      s->records->remaining -= S;
     }
   else
     {
       S = 0;
-      top = *remaining_records - *remaining_samples;
       V = gsl_rng_uniform_pos(r);
-      quot = top/(*remaining_records);
+      quot = (state->top)/(s->records->remaining);
 
       while (quot > V)
         {
           ++S;
-          --top;
-          --(*remaining_records);
-          quot *= top/(*remaining_records);
+          --(state->top);
+          --(s->records->remaining);
+          quot *= (state->top)/(s->records->remaining);
         }
     }
 
   return S;
 }
 
-static const gsl_sampler vitter_a = {"vitter_a", &vitter_a_skip};
+static const gsl_sampling_algorithm vitter_a =
+{"vitter_a",                  /* name */
+ sizeof(vitter_a_state_t),    /* size */
+ &vitter_a_init,              /* init */
+ &vitter_a_skip               /* skip */
+};
 
-const gsl_sampler *gsl_sampler_vitter_a = &vitter_a;
+const gsl_sampling_algorithm *gsl_sampler_vitter_a = &vitter_a;
 
 /* Algorithm D, introduced in Vitter (1984), requires only ~n random
    variates to be generated and runs in O(n) time.  This implementation
