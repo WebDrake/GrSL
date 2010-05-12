@@ -1,15 +1,20 @@
 -- GrSL - the GSL random Sampling Library --
 
 GrSL is an extension of the GNU Scientific Library (GSL) that aims to
-provide effective algorithms for efficient random sampling.
+provide efficient algorithms for sequential random sampling.  It is
+built with the aim of eventually being incorporated into GSL  proper,
+but is not yet an official part of the GSL.
 
-It is built with the aim of eventually being incorporated into GSL
-proper, but is not yet an official part of the GSL.
+Its API is designed for close compatibility with GSL, with the aim of
+minimising (or hopefully not requiring) any changes to users' code if/
+when it is incorporated into the main GSL library.
+
+The project is currently in an extremely preliminary stage.
+Contributions of advice, code and feedback are all welcome.
 
 GrSL is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License, version 3 or (at your
 option) any later version.
-
 
 --REFERENCES--
 
