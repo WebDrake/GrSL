@@ -54,6 +54,9 @@ GSL_VAR const gsl_sampler *gsl_sampler_vitter_a;
 GSL_VAR const gsl_sampler *gsl_sampler_vitter_d;
 GSL_VAR const gsl_sampler *gsl_sampler_nair_e;
 
+int
+gsl_sampler_choose(const gsl_sampler * s, const gsl_rng * r, void * dest,
+                   size_t k, void * src, size_t n, size_t size);
 
 #ifdef HAVE_INLINE
 

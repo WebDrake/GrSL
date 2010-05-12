@@ -29,43 +29,6 @@
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_sampling.h>
 
-/* Include a copy of ... well, copy ... for gsl_sampler_choose to use */
-static inline void
-copy (void * dest, size_t i, void * src, size_t j, size_t size)
-{
-  register char * a = size * i + (char *) dest ;
-  register char * b = size * j + (char *) src ;
-  register size_t s = size ;
-
-  do
-    {
-      *a++ = *b++;
-    }
-  while (--s > 0);
-}
-
-int
-gsl_sampler_choose(const gsl_sampler * s, const gsl_rng * r, void * dest,
-                   size_t k, void * src, size_t n, size_t size)
-{
-  size_t k_ = k, N = n;
-  size_t current_record = 0, selected_record;
-
-  if ( k > n)
-    {
-      GSL_ERROR ("k is greater than n, cannot sample more than n items",
-                 GSL_EINVAL) ;
-    }
-
-  while(k_ > 0)
-    {
-      selected_record = gsl_sampler_select(s, r, &current_record, &N, &k_);
-      copy(dest, k-k_, src, selected_record, size);
-    }
-
-  return GSL_SUCCESS;
-}
-
 int main(void)
 {
   size_t i, N, n, current_record, selected_record;
