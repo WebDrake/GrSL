@@ -21,7 +21,9 @@
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_sampling.h>
 
-/* Include a copy of ... well, copy ... for gsl_sampler_choose to use */
+/* Include a copy of ... well, copy ... for gsl_sampler_choose to use.
+   TODO: check if you can actually use the one in gsl's randist/shuffle.c.
+ */
 static inline void
 copy (void * dest, size_t i, void * src, size_t j, size_t size)
 {
@@ -36,6 +38,12 @@ copy (void * dest, size_t i, void * src, size_t j, size_t size)
   while (--s > 0);
 }
 
+/* Reimplements the gsl_ran_choose function in randist/shuffle.c of the
+   GSL to use GrSL sampling algorithms to select the chosen subset.
+
+   Runs in approximately 2/3 the time of gsl_ran_choose when using the
+   simple Algorithm A.
+ */
 int
 gsl_sampler_choose(const gsl_sampler * s, const gsl_rng * r, void * dest,
                    size_t k, void * src, size_t n, size_t size)
