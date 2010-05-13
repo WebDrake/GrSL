@@ -89,15 +89,23 @@ void grsl_test_aggregate(const gsl_sampler *s, const gsl_rng *r, size_t n, size_
   free(record_count);
 }
 
-int main(void)
+int main(int argc, char *argv[])
 {
   size_t i;
   gsl_sampler *s = gsl_sampler_alloc(gsl_sampler_vitter_a);
   gsl_rng *r = gsl_rng_alloc(gsl_rng_mt19937);
   double *dest, *src;
+  time_t ranseed;
   clock_t start_time, end_time;
 
-  gsl_rng_set(r,time(NULL));
+  if(argc>1)
+    ranseed = atoi(argv[1]);
+  else
+    time(&ranseed);
+
+  gsl_rng_set(r, ranseed);
+
+  printf("[Random seed set to %zu.]\n\n",ranseed);
 
   printf("Hello! I'm GrSL, the GSL random Sampling Library.\n\n");
 
