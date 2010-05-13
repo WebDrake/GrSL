@@ -42,17 +42,12 @@
    to be taken is greater than a certain proportion (0.05--0.15) of
    the total number of remaining records to be sampled from.
  */
-typedef struct
-  {
-    double top;
-  }
-vitter_a_state_t;
-
 void
 vitter_a_init(const gsl_sampler * s, const gsl_rng * r)
 {
-  vitter_a_state_t *state = s->state;
-  state->top = s->records->remaining - s->sample->remaining;
+  /* Algorithm A does not require any initialisation :-)
+     For the same reason, no vitter_a_state_t is defined.
+   */
 }
 
 /*
@@ -95,8 +90,7 @@ static size_t
 vitter_a_skip(const gsl_sampler * s, const gsl_rng * r)
 {
   size_t S;
-  double V, quot;
-  vitter_a_state_t *state = s->state;
+  double V, quot, top;
 
   if (s->sample->remaining == 1)
     {
@@ -106,15 +100,16 @@ vitter_a_skip(const gsl_sampler * s, const gsl_rng * r)
   else
     {
       S = 0;
+      top = s->records->remaining - s->sample->remaining;
+      quot = top/(s->records->remaining);
       V = gsl_rng_uniform_pos(r);
-      quot = (state->top)/(s->records->remaining);
 
       while (quot > V)
         {
           ++S;
-          --(state->top);
+          --top;
           --(s->records->remaining);
-          quot *= (state->top)/(s->records->remaining);
+          quot *= top/(s->records->remaining);
         }
     }
 
@@ -123,7 +118,7 @@ vitter_a_skip(const gsl_sampler * s, const gsl_rng * r)
 
 static const gsl_sampling_algorithm vitter_a =
 {"vitter_a",                  /* name */
- sizeof(vitter_a_state_t),    /* size */
+ 0,                           /* size */
  &vitter_a_init,              /* init */
  &vitter_a_skip               /* skip */
 };
