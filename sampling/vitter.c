@@ -89,8 +89,8 @@ vitter_a_init(const gsl_sampler * s, const gsl_rng * r)
 static size_t
 vitter_a_skip(const gsl_sampler * s, const gsl_rng * r)
 {
-  size_t S;
-  double V, quot, top;
+  register size_t S;
+  register double V, quot, top;
 
   if (s->sample->remaining == 1)
     {
