@@ -87,29 +87,30 @@ vitter_a_init(const gsl_sampler * s, const gsl_rng * r)
        skip functions and placed entirely in gsl_sampler_skip.
  */
 static size_t
-vitter_a_skip(const gsl_sampler * s, const gsl_rng * r)
+vitter_a_skip(void * vstate, gsl_sampling_records * const records,
+              gsl_sampling_records * const sample, const gsl_rng *r)
 {
   register size_t S;
   register double V, quot, top;
 
-  if (s->sample->remaining == 1)
+  if (sample->remaining == 1)
     {
-      S = gsl_rng_uniform_int(r, s->records->remaining);
-      s->records->remaining -= S;
+      S = gsl_rng_uniform_int(r, records->remaining);
+      records->remaining -= S;
     }
   else
     {
       S = 0;
-      top = s->records->remaining - s->sample->remaining;
-      quot = top/(s->records->remaining);
+      top = records->remaining - sample->remaining;
+      quot = top/(records->remaining);
       V = gsl_rng_uniform_pos(r);
 
       while (quot > V)
         {
           ++S;
           --top;
-          --(s->records->remaining);
-          quot *= top/(s->records->remaining);
+          --(records->remaining);
+          quot *= top/(records->remaining);
         }
     }
 

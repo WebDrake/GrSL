@@ -44,19 +44,20 @@ typedef struct GSL_SAMPLER gsl_sampler;
 
 typedef struct
   {
-    const char *name;
-    size_t size;
-    void (*init) (const gsl_sampler * s, const gsl_rng *r);
-    size_t (*skip) (const gsl_sampler * s, const gsl_rng *r);
-  }
-gsl_sampling_algorithm;
-
-typedef struct
-  {
     size_t total;
     size_t remaining;
   }
 gsl_sampling_records;
+
+typedef struct
+  {
+    const char *name;
+    size_t size;
+    void (*init) (const gsl_sampler * s, const gsl_rng *r);
+    size_t (*skip) (void * vstate, gsl_sampling_records * const records,
+                    gsl_sampling_records * const sample, const gsl_rng *r);
+  }
+gsl_sampling_algorithm;
 
 struct GSL_SAMPLER
   {
@@ -103,7 +104,7 @@ gsl_sampler_skip (const gsl_sampler * s, const gsl_rng * r)
                      GSL_EINVAL, 0) ;
     }
 
-  S = (s->algorithm->skip) (s, r);
+  S = (s->algorithm->skip) (s->state, s->records, s->sample, r);
 
   --(s->records->remaining);
   --(s->sample->remaining);
