@@ -43,7 +43,8 @@
    the total number of remaining records to be sampled from.
  */
 void
-vitter_a_init(const gsl_sampler * s, const gsl_rng * r)
+vitter_a_init(void * vstate, const gsl_sampling_records * const sample,
+              const gsl_sampling_records * const records, const gsl_rng *r)
 {
   /* Algorithm A does not require any initialisation :-)
      For the same reason, no vitter_a_state_t is defined.
@@ -87,8 +88,8 @@ vitter_a_init(const gsl_sampler * s, const gsl_rng * r)
        skip functions and placed entirely in gsl_sampler_skip.
  */
 static size_t
-vitter_a_skip(void * vstate, gsl_sampling_records * const records,
-              gsl_sampling_records * const sample, const gsl_rng *r)
+vitter_a_skip(void * vstate, gsl_sampling_records * const sample,
+              gsl_sampling_records * const records, const gsl_rng *r)
 {
   register size_t S;
   register double V, quot, top;

@@ -82,17 +82,18 @@ gsl_sampler_free(gsl_sampler * s)
 }
 
 int
-gsl_sampler_init(const gsl_sampler * s, const gsl_rng *r, size_t samples, size_t records)
+gsl_sampler_init(const gsl_sampler * s, const gsl_rng *r, size_t sample_size,
+                 size_t records)
 {
-  if ( samples > records )
+  if ( sample_size > records )
     {
       GSL_ERROR ("Sample size cannot be greater than the number of records!",
                  GSL_EINVAL) ;
     }
 
-  s->sample->remaining = s->sample->total = samples;
+  s->sample->remaining = s->sample->total = sample_size;
   s->records->remaining = s->records->total = records;
-  (s->algorithm->init) (s, r);
+  (s->algorithm->init) (s->state, s->sample, s->records, r);
 
   return GSL_SUCCESS;
 }

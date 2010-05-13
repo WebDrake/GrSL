@@ -33,7 +33,7 @@ void grsl_test_simple(const gsl_sampler *s, const gsl_rng *r, size_t n, size_t N
 {
   size_t i, current_record, selected_record;
 
-  gsl_sampler_init(s,r,5,10);
+  gsl_sampler_init(s,r,n,N);
   current_record = 1;
 
   printf("%s, %zu from %zu:\n",s->algorithm->name, n, N);

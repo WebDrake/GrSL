@@ -40,8 +40,6 @@
 
 __BEGIN_DECLS
 
-typedef struct GSL_SAMPLER gsl_sampler;
-
 typedef struct
   {
     size_t total;
@@ -53,19 +51,21 @@ typedef struct
   {
     const char *name;
     size_t size;
-    void (*init) (const gsl_sampler * s, const gsl_rng *r);
-    size_t (*skip) (void * vstate, gsl_sampling_records * const records,
-                    gsl_sampling_records * const sample, const gsl_rng *r);
+    void (*init) (void * vstate, const gsl_sampling_records * const sample,
+                  const gsl_sampling_records * const records, const gsl_rng *r);
+    size_t (*skip) (void * vstate, gsl_sampling_records * const sample,
+                    gsl_sampling_records * const records, const gsl_rng *r);
   }
 gsl_sampling_algorithm;
 
-struct GSL_SAMPLER
+typedef struct
   {
     const gsl_sampling_algorithm *algorithm;
-    gsl_sampling_records *records;
     gsl_sampling_records *sample;
+    gsl_sampling_records *records;
     void *state;
-  };
+  }
+gsl_sampler;
 
 
 GSL_VAR const gsl_sampling_algorithm *gsl_sampler_vitter_a;
@@ -80,7 +80,8 @@ void
 gsl_sampler_free(gsl_sampler * s);
 
 int
-gsl_sampler_init(const gsl_sampler *s, const gsl_rng *r, size_t samples, size_t records);
+gsl_sampler_init(const gsl_sampler *s, const gsl_rng *r, size_t sample_size,
+                 size_t records);
 
 int
 gsl_sampler_choose(const gsl_sampler * s, const gsl_rng * r, void * dest,
@@ -104,10 +105,10 @@ gsl_sampler_skip (const gsl_sampler * s, const gsl_rng * r)
                      GSL_EINVAL, 0) ;
     }
 
-  S = (s->algorithm->skip) (s->state, s->records, s->sample, r);
+  S = (s->algorithm->skip) (s->state, s->sample, s->records, r);
 
-  --(s->records->remaining);
   --(s->sample->remaining);
+  --(s->records->remaining);
 
   return S;
 }
