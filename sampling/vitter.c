@@ -41,14 +41,32 @@
    Algorithm D uses this method when the number of remaining samples
    to be taken is greater than a certain proportion (0.05--0.15) of
    the total number of remaining records to be sampled from.
+ */
+typedef struct
+  {
+    double top;
+  }
+vitter_a_state_t;
 
-   --NOTES--
+void
+vitter_a_init(const gsl_sampler * s, const gsl_rng * r)
+{
+  vitter_a_state_t *state = s->state;
+  state->top = s->records->remaining - s->sample->remaining;
+}
 
-     * Use of gsl_rng_uniform_pos to set value of V.  Vitter
-       (1984, 1987) assumes random variates are in the open interval
-       (0,1).  It is not clear whether this is essential.  If it is
-       not required a (miniscule:-) performance improvement may be
-       possible here.
+/*
+   A few notes on the implementation of the Algorithm A skip function:
+
+     * Use of gsl_rng_uniform_pos to set value of V.  Vitter (1984,
+       1987) assumes random variates are in the open interval (0,1).
+       The requirement from this seems to stem (in Algorithm A at
+       least) from the fact that when top == 0 (and hence quot==0),
+       it is _essential_ to pick the next record (AFAICS:-).
+
+         -- Note that this allows a possible improvement to the
+            algorithm that can remove generation of some random
+            variates, by placing an if(top>0) statement ...
 
      * Use of gsl_rng_uniform_int if the number of remaining samples
        is only 1.  Vitter (1984) simply calls for the truncation
@@ -65,23 +83,10 @@
        in the range [0, N-1], which is what gsl_rng_uniform_int
        provides.
 
-     * Alteration of *remaining_records and *remaining_samples -- see
-       if this can be removed entirely outside these individual skip
-       functions and placed entirely in gsl_sampler_skip.
+     * Alteration of s->records->remaining and s->samples->remaining:
+       see if this can be removed entirely outside these individual
+       skip functions and placed entirely in gsl_sampler_skip.
  */
-typedef struct
-  {
-    double top;
-  }
-vitter_a_state_t;
-
-void
-vitter_a_init(const gsl_sampler * s, const gsl_rng * r)
-{
-  vitter_a_state_t *state = s->state;
-  state->top = s->records->remaining - s->sample->remaining;
-}
-
 static size_t
 vitter_a_skip(const gsl_sampler * s, const gsl_rng * r)
 {
