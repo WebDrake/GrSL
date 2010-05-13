@@ -61,12 +61,16 @@ vitter_a_init(const gsl_sampler * s, const gsl_rng * r)
      * Use of gsl_rng_uniform_pos to set value of V.  Vitter (1984,
        1987) assumes random variates are in the open interval (0,1).
        The requirement from this seems to stem (in Algorithm A at
-       least) from the fact that when top == 0 (and hence quot==0),
-       it is _essential_ to pick the next record (AFAICS:-).
+       least) from the fact (AFAICS, do not trust me on this one:-)
+       that when top == 0 (and hence quot==0), it is _essential_ to
+       pick the next record, i.e. we cannot allow the rare but
+       possible case that V==0.
 
-         -- Note that this allows a possible improvement to the
-            algorithm that can remove generation of some random
-            variates, by placing an if(top>0) statement ...
+         -- Note that this could allow a saving in the number of
+            required random variates by including an if(top>0)
+            statement.  However, the cost of the continually-being-
+            checked if() statement turns out to be greater than the
+            savings from the (apparently rare) cases when top==0.
 
      * Use of gsl_rng_uniform_int if the number of remaining samples
        is only 1.  Vitter (1984) simply calls for the truncation
