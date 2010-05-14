@@ -148,3 +148,137 @@ const gsl_sampling_algorithm *gsl_sampler_vitter_a = &vitter_a;
 
      * ... in any case, test with different values of alpha_inverse.
  */
+typedef struct
+  {
+    double Vprime;
+    bool use_algorithm_a;
+  }
+vitter_d_state_t;
+
+static const short int vitter_d_alpha_inverse = 13;
+
+void
+vitter_d_init(void * vstate, const gsl_sampling_records * const sample,
+              const gsl_sampling_records * const records, const gsl_rng *r)
+{
+  vitter_d_state_t *state = vstate;
+  if ( (vitter_d_alpha_inverse * sample->remaining) > records->remaining )
+    {
+      state->use_algorithm_a = true;
+    }
+  else
+    {
+      state->Vprime = exp ( log(gsl_rng_uniform_pos(r)) / (sample->remaining) ) ;
+      state->use_algorithm_a = false;
+    }
+}
+
+static size_t
+vitter_d_skip(void * vstate, gsl_sampling_records * const sample,
+              gsl_sampling_records * const records, const gsl_rng *r)
+{
+  register size_t S;
+  register vitter_d_state_t *state = vstate;
+  register size_t top, t, limit;
+  register size_t qu1 = 1 + records->remaining - sample->remaining;
+  register double X, y1, y2, bottom;
+
+  /* If the remainining number of sample points needed is greater than
+     a certain proportion of the remaining records, we finish off using
+     Algorithm A... */
+  if ( (vitter_d_alpha_inverse * sample->remaining) > records->remaining )
+    state->use_algorithm_a = true;
+
+  /* ... like this. :-) */
+  if ( state->use_algorithm_a )
+    {
+      return vitter_a_skip(NULL, sample, records, r);
+    }
+  else if ( sample->remaining > 1)
+    {
+      while ( 1 )
+        {
+          /* Step D2: set X and U */
+          while ( 1 )
+            {
+              X = records->remaining * (1 - state->Vprime);
+              S = trunc(X);
+              if ( S < qu1 )
+                break;
+              else
+                state->Vprime = exp ( log(gsl_rng_uniform_pos(r)) / (sample->remaining) );
+            }
+
+          y1 = exp ( log(gsl_rng_uniform_pos(r) * ((double) records->remaining)/qu1)
+                       * (1.0/(sample->remaining - 1)) );
+
+          state->Vprime
+            = y1 * ((-X/records->remaining)+1.0) * ( qu1/( ((double) qu1) - S ) );
+
+          /* Step D3: if state->Vprime <= 1.0 our work is done, otherwise ... */
+          if ( state->Vprime > 1.0 )
+            {
+              y2 = 1.0;
+              top = records->remaining - 1;
+
+              if ( sample->remaining > (S+1) )
+                {
+                  bottom = records->remaining - sample->remaining;
+                  limit = records->remaining - S;
+                }
+              else
+                {
+                  bottom = records->remaining - (S+1);
+                  limit = qu1;
+                }
+
+              for ( t = (records->remaining - 1); t >= limit; --t)
+                {
+                  y2 = (y2 * top)/bottom;
+                  --top;
+                  --bottom;
+                }
+
+              /* Step D4: decide whether or not to go right back to the start
+                 of this damn while() loop ... :-) */
+
+              if( (records->remaining/(records->remaining - X))
+                    < (y1 * exp(log(y2)/(sample->remaining - 1))) )
+                {
+                  /* If we're unlucky, we just have to generate a new Vprime
+                     and go right back to the beginning.
+                     printf("D4 fail.  "); fflush(stdout); */
+                  state->Vprime
+                    = exp ( log(gsl_rng_uniform_pos(r)) / (sample->remaining) ) ;
+                }
+              else
+                {
+                  /* If we're lucky, we accept S and generate a new Vprime ...
+                     printf("D4 exit: %zu\n",S); fflush(stdout); */
+                  state->Vprime
+                    = exp ( log(gsl_rng_uniform_pos(r)) / (sample->remaining - 1) ) ;
+                  return S;
+                }
+            }
+          else
+            {
+              /* printf("D3 exit: %zu\n",S); fflush(stdout); */
+              return S;
+            }
+        }
+    }
+  else
+    {
+      /* If only one sample point remains to be taken ... */
+      return trunc ( records->remaining * state->Vprime );
+    }
+}
+
+static const gsl_sampling_algorithm vitter_d =
+{"vitter_d",                  /* name */
+ sizeof(vitter_d_state_t),    /* size */
+ &vitter_d_init,              /* init */
+ &vitter_d_skip               /* skip */
+};
+
+const gsl_sampling_algorithm *gsl_sampler_vitter_d = &vitter_d;
