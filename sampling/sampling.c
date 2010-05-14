@@ -118,10 +118,13 @@ copy (void * dest, size_t i, void * src, size_t j, size_t size)
 /* Reimplements the gsl_ran_choose function in randist/shuffle.c of the
    GSL to use GrSL sampling algorithms to select the chosen subset.
 
-   Assuming that sample size n is << the number N of records, this runs
+   Assuming that sample size k is << the number n of records, this runs
    in approximately 2/3 the time of gsl_ran_choose when using the simple
-   Algorithm A.  (Both algorithms are O(N) in running time but Algorithm
-   A requires only n random variates to be generated.)
+   Algorithm A.  (Both algorithms are O(n) in running time but Algorithm
+   A requires only k random variates to be generated.)
+
+   Run with the more efficient Algorithm D, which runs in o(k) time and
+   requires only about k random variates, the savings can be considerable.
  */
 int
 gsl_sampler_choose(const gsl_sampler * s, const gsl_rng * r, void * dest,
