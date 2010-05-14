@@ -108,7 +108,7 @@ gsl_sampler_skip (const gsl_sampler * s, const gsl_rng * r)
   S = (s->algorithm->skip) (s->state, s->sample, s->records, r);
 
   --(s->sample->remaining);
-  --(s->records->remaining);
+  s->records->remaining -= (S+1);
 
   return S;
 }

@@ -28,6 +28,8 @@
  */
 
 #include <math.h>
+#include <stdbool.h>
+#include <gsl/gsl_randist.h>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_sampling.h>
 
@@ -97,7 +99,6 @@ vitter_a_skip(void * vstate, gsl_sampling_records * const sample,
   if (sample->remaining == 1)
     {
       S = gsl_rng_uniform_int(r, records->remaining);
-      records->remaining -= S;
     }
   else
     {
@@ -109,9 +110,7 @@ vitter_a_skip(void * vstate, gsl_sampling_records * const sample,
       while (quot > V)
         {
           ++S;
-          --top;
-          --(records->remaining);
-          quot *= top/(records->remaining);
+          quot *= (top - S) / (records->remaining - S);
         }
     }
 
