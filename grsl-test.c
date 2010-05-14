@@ -93,6 +93,7 @@ int main(int argc, char *argv[])
 {
   size_t i;
   gsl_sampler *s = gsl_sampler_alloc(gsl_sampler_vitter_a);
+  gsl_sampler *sd = gsl_sampler_alloc(gsl_sampler_vitter_d);
   gsl_rng *r = gsl_rng_alloc(gsl_rng_mt19937);
   double *dest, *src;
   time_t ranseed;
@@ -114,16 +115,18 @@ int main(int argc, char *argv[])
 
   printf("Let me show you what I can do so far.\n\n");
 
-  printf("First, I'm going to make a sample of 5 records out of 10.\n\n");
+  printf("First, I'm going to make some samples of 5 records out of 100.\n\n");
 
-  grsl_test_simple(s, r, 5, 10);
+  grsl_test_simple(s, r, 5, 100);
+  grsl_test_simple(sd, r, 5, 100);
 
   printf("\n");
-  printf("Now, I'm going to make a sample of 3 records out of 10, but do so\n");
+  printf("Now, I'm going to make a sample of 5 records out of 100, but do so\n");
   printf("10 million times.  Then you can count how many times each record gets\n");
   printf("picked.  (This is just a stupid way of checking for obvious bias:-)\n\n");
 
-  grsl_test_aggregate(s, r, 3, 10, 10000000);
+  grsl_test_aggregate(s, r, 5, 100, 10000000);
+  grsl_test_aggregate(sd, r, 5, 100, 10000000);
 
   printf("\n");
   printf("Next up, we provide a comparison of the gsl_ran_choose function with\n");
@@ -156,10 +159,18 @@ int main(int argc, char *argv[])
   printf("\t\tfinished in %g seconds with %s.\n",
          ((double) (end_time-start_time))/CLOCKS_PER_SEC, s->algorithm->name);
 
+  start_time = clock();
+  gsl_sampler_choose(sd, r, dest, 100000, src, 10000000, sizeof(double));
+  end_time=clock();
+
+  printf("\t\tfinished in %g seconds with %s.\n",
+         ((double) (end_time-start_time))/CLOCKS_PER_SEC, sd->algorithm->name);
+
   free(dest);
   free(src);
 
   gsl_sampler_free(s);
+  gsl_sampler_free(sd);
   gsl_rng_free(r);
 
   return EXIT_SUCCESS;
