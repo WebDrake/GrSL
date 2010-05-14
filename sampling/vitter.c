@@ -126,6 +126,7 @@ static const gsl_sampling_algorithm vitter_a =
 
 const gsl_sampling_algorithm *gsl_sampler_vitter_a = &vitter_a;
 
+
 /* Algorithm D, introduced in Vitter (1984), requires only ~n random
    variates to be generated and runs in O(n) time.  This implementation
    follows the more efficient version introduced in Vitter (1987).
@@ -135,18 +136,12 @@ const gsl_sampling_algorithm *gsl_sampler_vitter_a = &vitter_a;
    proportion alpha of the total number of remaining records.  This
    implementation follows Vitter (1987) in taking alpha = 1/13.
 
-   A still more refined version is found in Algorithm E introduced by
-   Nair (1990).
+   Brief and entirely inadequate testing on the present author's part
+   suggests that this is indeed an optimal choice. :-)
 
-   --NOTES--
-
-     * An option to set alpha (or alpha_inverse) could be useful.
-       This could be a reason to resurrect the more complicated
-       gsl_sampler implementation modelled on the gsl_rng example,
-       with a sampler containing some void *state which can be set
-       with a config function.
-
-     * ... in any case, test with different values of alpha_inverse.
+   The algorithm was further refined by Nair (1990) whose Algorithm E
+   takes advantage of some cases where skip values of Algorithm A can
+   be calculated exactly in a single step.
  */
 typedef struct
   {
@@ -155,13 +150,24 @@ typedef struct
   }
 vitter_d_state_t;
 
+/* As per Vitter (1984, 1987) we do not store the floating-point value
+   of alpha but store an integer value that is 1/alpha.  Following
+   Vitter's suggestion this is set to 13. */
 static const short int vitter_d_alpha_inverse = 13;
 
+/* Algorithm D stores two pieces of information: the random variate
+   Vprime, which must be preserved between calls to the skip function,
+   and a boolean to indicate whether or not to generate remaining
+   skip values using Algorithm A. */
 void
 vitter_d_init(void * vstate, const gsl_sampling_records * const sample,
               const gsl_sampling_records * const records, const gsl_rng *r)
 {
   vitter_d_state_t *state = vstate;
+
+  /* We can save ourselves one random variate by checking at the very
+     beginning whether or not the sample size is larger than the threshold
+     to start using Algorithm A. */
   if ( (vitter_d_alpha_inverse * sample->remaining) > records->remaining )
     {
       state->use_algorithm_a = true;
@@ -173,15 +179,28 @@ vitter_d_init(void * vstate, const gsl_sampling_records * const sample,
     }
 }
 
+/* Algorithm D's skip function employs some clever tricks to minimise
+   the number of random variates that must be generated -- if we are
+   lucky, the algorithm exits with a condition such that the next
+   variate in the sequence can be calculated cheaply and numerically
+   directly from the one before.
+
+   In principle the log(gsl_rng_uniform_pos(r)) statements could be
+   replaced with calls to the exponential distribution, but it's not
+   clear this would be any more than simply a notational shortcut.
+   There might also be some issues with finnicky details of the
+   implementation that are different from what Vitter intends or
+   assumes, so the safe choice is made here. :-)
+ */
 static size_t
 vitter_d_skip(void * vstate, gsl_sampling_records * const sample,
               gsl_sampling_records * const records, const gsl_rng *r)
 {
-  register size_t S;
-  register vitter_d_state_t *state = vstate;
-  register size_t top, t, limit;
-  register size_t qu1 = 1 + records->remaining - sample->remaining;
-  register double X, y1, y2, bottom;
+  size_t S;
+  vitter_d_state_t *state = vstate;
+  size_t top, t, limit;
+  size_t qu1 = 1 + records->remaining - sample->remaining;
+  double X, y1, y2, bottom;
 
   /* If the remainining number of sample points needed is greater than
      a certain proportion of the remaining records, we finish off using
