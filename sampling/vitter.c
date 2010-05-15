@@ -174,7 +174,7 @@ vitter_d_init(void * vstate, const gsl_sampling_records * const sample,
     }
   else
     {
-      state->Vprime = exp ( log(gsl_rng_uniform_pos(r)) / (sample->remaining) ) ;
+      state->Vprime = pow ( gsl_rng_uniform_pos(r), 1.0/(sample->remaining) ) ;
       state->use_algorithm_a = false;
     }
 }
@@ -225,11 +225,11 @@ vitter_d_skip(void * vstate, gsl_sampling_records * const sample,
               if ( S < qu1 )
                 break;
               else
-                state->Vprime = exp ( log(gsl_rng_uniform_pos(r)) / (sample->remaining) );
+                state->Vprime = pow ( gsl_rng_uniform_pos(r), 1.0/(sample->remaining) );
             }
 
-          y1 = exp ( log(gsl_rng_uniform_pos(r) * ((double) records->remaining)/qu1)
-                       * (1.0/(sample->remaining - 1)) );
+          y1 = pow ( (gsl_rng_uniform_pos(r) * ((double) records->remaining)/qu1),
+                     (1.0/(sample->remaining - 1)) );
 
           state->Vprime
             = y1 * ((-X/records->remaining)+1.0) * ( qu1/( ((double) qu1) - S ) );
@@ -262,20 +262,20 @@ vitter_d_skip(void * vstate, gsl_sampling_records * const sample,
                  of this damn while() loop ... :-) */
 
               if( (records->remaining/(records->remaining - X))
-                    < (y1 * exp(log(y2)/(sample->remaining - 1))) )
+                    < ( y1 * pow(y2, 1.0/(sample->remaining - 1)) ) )
                 {
                   /* If we're unlucky, we just have to generate a new Vprime
                      and go right back to the beginning.
                      printf("D4 fail.  "); fflush(stdout); */
                   state->Vprime
-                    = exp ( log(gsl_rng_uniform_pos(r)) / (sample->remaining) ) ;
+                    = pow ( gsl_rng_uniform_pos(r),  1.0/(sample->remaining) ) ;
                 }
               else
                 {
                   /* If we're lucky, we accept S and generate a new Vprime ...
                      printf("D4 exit: %zu\n",S); fflush(stdout); */
                   state->Vprime
-                    = exp ( log(gsl_rng_uniform_pos(r)) / (sample->remaining - 1) ) ;
+                    = pow ( gsl_rng_uniform_pos(r), 1.0/(sample->remaining - 1) ) ;
                   return S;
                 }
             }
