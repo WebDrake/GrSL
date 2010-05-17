@@ -71,9 +71,9 @@ vitter_a_init(void * vstate, const gsl_sampling_records * const sample,
             savings from the (apparently rare) cases when top==0.
 
      * Use of gsl_rng_uniform_int if the number of remaining samples
-       is only 1.  Vitter (1984) simply calls for the truncation
-       (floor?) of the product of a random variate in (0,1) and the
-       number N of remaining records.  Vitter (1987) gives a more
+       is only 1.  Vitter (1984) simply calls for the truncation (i.e.
+       integer part) of the product of a random variate in (0,1) and
+       the number N of remaining records.  Vitter (1987) gives a more
        complicated expression,
 
            S := TRUNC( ROUND(Nreal) * UNIFORMRV() )
