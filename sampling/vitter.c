@@ -185,12 +185,11 @@ vitter_d_init(void * vstate, const gsl_sampling_records * const sample,
    variate in the sequence can be calculated cheaply and numerically
    directly from the one before.
 
-   In principle the log(gsl_rng_uniform_pos(r)) statements could be
-   replaced with calls to the exponential distribution, but it's not
-   clear this would be any more than simply a notational shortcut.
-   There might also be some issues with finnicky details of the
-   implementation that are different from what Vitter intends or
-   assumes, so the safe choice is made here. :-)
+   The Pascal-style description of the algorithm in Vitter (1984, 1987)
+   employs multiple statements of the form exp(log(x) * y), presumably
+   because Pascal lacks a built-in power function.  These have been
+   transcribed into the form pow(x, y) in the present implementation.
+   Thanks to Zoltan Kuscsik for suggesting out this improvement. :-)
  */
 static size_t
 vitter_d_skip(void * vstate, gsl_sampling_records * const sample,
