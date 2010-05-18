@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
 
   gsl_rng_set(r, ranseed);
 
-  printf("[Random seed set to %zu.]\n\n",ranseed);
+  printf("[Random seed set to %lu.]\n\n",(unsigned long int) ranseed);
 
   printf("Hello! I'm GrSL, the GSL random Sampling Library.\n\n");
 
