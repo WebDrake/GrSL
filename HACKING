@@ -3,9 +3,14 @@ computer (and sanity:-)
 
 Dependencies: gsl-dev (libgsl0-dev).
 
+Build dependencies: autoconf, automake, gcc, libtool, make, pgk-config
+
 To build and install, use the GNU Autotools:
 	
   autoreconf -ivf
   ./configure
   make
   make install
+
+Please submit bug reports and feature requests via the project issue tracker:
+http://github.com/WebDrake/GrSL/issues
