@@ -1,0 +1,8 @@
+/* Define if gsl/gsl_inline.h header exists */
+#undef HAVE_GSL_INLINE
+
+#ifdef HAVE_GSL_INLINE
+#include <gsl/gsl_inline.h>
+#else
+#define INLINE_FUN extern inline
+#endif

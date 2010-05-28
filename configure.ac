@@ -5,6 +5,7 @@ AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([-Wall -Werror gnu])
 
 AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_HEADERS([sampling/gsl_sampling_config.h])
 
 GRSL_LT_VERSION="0:0:0"
 AC_SUBST(GRSL_LT_VERSION)
@@ -55,9 +56,11 @@ dnl Disable unnecessary libtool tests for FORTRAN and Java
 define([AC_LIBTOOL_LANG_F77_CONFIG],[:])dnl
 define([AC_LIBTOOL_LANG_GCJ_CONFIG],[:])dnl
 
+dnl Check for GNU Scientific Library
 PKG_CHECK_MODULES(DEPS,[gsl >= 1.8])
 AC_SUBST(DEPS_CFLAGS)
 AC_SUBST(DEPS_LIBS)
+AC_CHECK_HEADER([gsl/gsl_inline.h],[AC_DEFINE([HAVE_GSL_INLINE],[1],[Define if gsl/gsl_inline.h header exists])])
 
 GRSL_CFLAGS="-I$includedir $DEPS_CFLAGS"
 GRSL_LDFLAGS="$DEPS_LIBS"

@@ -25,8 +25,8 @@
 #define __GSL_SAMPLING_H__
 #include <gsl/gsl_types.h>
 #include <gsl/gsl_errno.h>
-#include <gsl/gsl_inline.h>
 #include <gsl/gsl_rng.h>
+#include <gsl/gsl_sampling_config.h>
 
 #undef __BEGIN_DECLS
 #undef __END_DECLS
