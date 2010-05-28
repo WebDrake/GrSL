@@ -84,10 +84,6 @@ vitter_a_init(void * vstate, const gsl_sampling_records * const sample,
        ways of describing generating a uniformly-distributed integer
        in the range [0, N-1], which is what gsl_rng_uniform_int
        provides.
-
-     * Alteration of s->records->remaining and s->samples->remaining:
-       see if this can be removed entirely outside these individual
-       skip functions and placed entirely in gsl_sampler_skip.
  */
 static size_t
 vitter_a_skip(void * vstate, gsl_sampling_records * const sample,
@@ -251,11 +247,7 @@ vitter_d_skip(void * vstate, gsl_sampling_records * const sample,
                 }
 
               for ( t = (records->remaining - 1); t >= limit; --t)
-                {
-                  y2 = (y2 * top)/bottom;
-                  --top;
-                  --bottom;
-                }
+                y2 *= top--/bottom--;
 
               /* Step D4: decide whether or not to go right back to the start
                  of this damn while() loop ... :-) */
