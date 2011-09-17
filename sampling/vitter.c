@@ -200,14 +200,16 @@ vitter_d_skip(void * vstate, gsl_sampling_records * const sample,
   /* If the remainining number of sample points needed is greater than
      a certain proportion of the remaining records, we finish off using
      Algorithm A... */
-  if ( (vitter_d_alpha_inverse * sample->remaining) > records->remaining )
-    state->use_algorithm_a = true;
-
-  /* ... like this. :-) */
   if ( state->use_algorithm_a )
     {
       return vitter_a_skip(NULL, sample, records, r);
     }
+  else if ( (vitter_d_alpha_inverse * sample->remaining) > records->remaining )
+    {
+      state->use_algorithm_a = true;
+      return vitter_a_skip(NULL, sample, records, r);
+    }
+  /* Otherwise, we use the standard Algorithm D skip function. */
   else if ( sample->remaining > 1)
     {
       while ( 1 )
