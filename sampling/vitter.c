@@ -151,6 +151,12 @@ vitter_d_state_t;
    Vitter's suggestion this is set to 13. */
 static const short int vitter_d_alpha_inverse = 13;
 
+extern inline double
+vitter_d_vprime(const size_t sample_remaining, const gsl_rng *r)
+{
+  return pow ( gsl_rng_uniform_pos(r), 1.0/sample_remaining ) ;
+}
+
 /* Algorithm D stores two pieces of information: the random variate
    Vprime, which must be preserved between calls to the skip function,
    and a boolean to indicate whether or not to generate remaining
@@ -170,7 +176,7 @@ vitter_d_init(void * vstate, const gsl_sampling_records * const sample,
     }
   else
     {
-      state->Vprime = pow ( gsl_rng_uniform_pos(r), 1.0/(sample->remaining) ) ;
+      state->Vprime = vitter_d_vprime(sample->remaining, r);
       state->use_algorithm_a = false;
     }
 }
@@ -215,14 +221,11 @@ vitter_d_skip(void * vstate, gsl_sampling_records * const sample,
       while ( 1 )
         {
           /* Step D2: set X and U */
-          while ( 1 )
+          for(X = records->remaining * (1 - state->Vprime), S = trunc(X);
+              S >= qu1;
+              X = records->remaining * (1 - state->Vprime), S = trunc(X))
             {
-              X = records->remaining * (1 - state->Vprime);
-              S = trunc(X);
-              if ( S < qu1 )
-                break;
-              else
-                state->Vprime = pow ( gsl_rng_uniform_pos(r), 1.0/(sample->remaining) );
+              state->Vprime = vitter_d_vprime(sample->remaining, r);
             }
 
           y1 = pow ( (gsl_rng_uniform_pos(r) * ((double) records->remaining)/qu1),
@@ -260,15 +263,13 @@ vitter_d_skip(void * vstate, gsl_sampling_records * const sample,
                   /* If we're unlucky, we just have to generate a new Vprime
                      and go right back to the beginning.
                      printf("D4 fail.  "); fflush(stdout); */
-                  state->Vprime
-                    = pow ( gsl_rng_uniform_pos(r),  1.0/(sample->remaining) ) ;
+                  state->Vprime = vitter_d_vprime(sample->remaining, r);
                 }
               else
                 {
                   /* If we're lucky, we accept S and generate a new Vprime ...
                      printf("D4 exit: %zu\n",S); fflush(stdout); */
-                  state->Vprime
-                    = pow ( gsl_rng_uniform_pos(r), 1.0/(sample->remaining - 1) ) ;
+                  state->Vprime = vitter_d_vprime(sample->remaining - 1, r);
                   return S;
                 }
             }
