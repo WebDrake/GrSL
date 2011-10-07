@@ -5,7 +5,6 @@ AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([-Wall -Werror gnu])
 
 AC_CONFIG_HEADERS([config.h])
-AC_CONFIG_HEADERS([sampling/gsl_sampling_config.h])
 
 GRSL_LT_VERSION="0:0:0"
 AC_SUBST(GRSL_LT_VERSION)
